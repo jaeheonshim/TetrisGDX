@@ -17,4 +17,12 @@ public class BlockState {
     public boolean isFixed() {
         return fixed;
     }
+
+    public void setBlockColor(Color blockColor) {
+        this.blockColor = blockColor;
+    }
+
+    public void setFixed(boolean fixed) {
+        this.fixed = fixed;
+    }
 }

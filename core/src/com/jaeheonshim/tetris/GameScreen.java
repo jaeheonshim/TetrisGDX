@@ -16,6 +16,8 @@ public class GameScreen implements Screen {
     private SpriteBatch spriteBatch;
     private ShapeRenderer shapeRenderer;
 
+    private float blockUpdateTimer = 1;
+
     public GameScreen() {
         viewport = new FitViewport(700, 700);
 
@@ -29,10 +31,20 @@ public class GameScreen implements Screen {
 
     }
 
+    public void update(float delta) {
+        blockUpdateTimer -= delta;
+        if(blockUpdateTimer <= 0) {
+            blockUpdateTimer = 0.5f;
+            gameScene.getGameState().tickBlocks();
+        }
+    }
+
     @Override
     public void render(float delta) {
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+        update(delta);
 
         spriteBatch.setProjectionMatrix(viewport.getCamera().combined);
         shapeRenderer.setProjectionMatrix(viewport.getCamera().combined);

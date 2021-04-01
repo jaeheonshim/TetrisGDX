@@ -69,4 +69,8 @@ public class GameScene {
     public int getInnerGameHeightDimension() {
         return (innerGameHeight + 2) * 32;
     }
+
+    public GameState getGameState() {
+        return gameState;
+    }
 }
