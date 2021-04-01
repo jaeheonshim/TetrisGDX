@@ -90,16 +90,25 @@ public class GameState {
     }
 
     public void tickBlocks() {
+        BlockState[][] updated = new BlockState[height][width];
+
         for (int i = blockStates.length - 1; i >= 0; i--) {
             for (int j = blockStates[i].length - 1; j >= 0; j--) {
                 BlockState blockState = blockStates[i][j];
                 if (blockState != null && !blockState.isFixed() && i + 1 < blockStates.length) {
-                    blockStates[i + 1][j] = blockState;
-                    blockStates[i][j] = null;
+                    updated[i + 1][j] = blockState;
                 } else if (blockState != null && i + 1 >= blockStates.length && !blockState.isFixed()) {
                     fixMoving();
+                    applyUpdated(updated);
+                    return;
                 }
             }
+        }
+
+        if(isValidUpdate(updated)) {
+            applyUpdated(updated);
+        } else {
+            fixMoving();
         }
     }
 
@@ -115,13 +124,12 @@ public class GameState {
                     } else {
                         return;
                     }
-                } else if (blockState != null) {
-                    updatedState[i][j] = blockState;
                 }
             }
         }
 
-        this.blockStates = updatedState;
+        if(isValidUpdate(updatedState))
+            applyUpdated(updatedState);
     }
 
     public void rotateMoving() {
@@ -159,7 +167,8 @@ public class GameState {
         }
 
         if(transformSuccess) {
-            this.blockStates = updatedStates;
+            if(isValidUpdate(updatedStates))
+                applyUpdated(updatedStates);
             currentRotation++;
         }
     }
@@ -174,6 +183,32 @@ public class GameState {
         }
 
         return true;
+    }
+
+    private boolean isValidUpdate(BlockState[][] update) {
+        for(int i = 0; i < blockStates.length; i++) {
+            for(int j = 0; j < blockStates[j].length; j++) {
+                if(update[i][j] != null && !update[i][j].isFixed() && blockStates[i][j] != null && blockStates[i][j].isFixed()) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    private void applyUpdated(BlockState[][] updated) {
+        for(int i = 0; i < updated.length; i++) {
+            for(int j = 0; j < updated[i].length; j++) {
+                if(blockStates[i][j] != null && !blockStates[i][j].isFixed()) {
+                    blockStates[i][j] = null;
+                }
+
+                if(updated[i][j] != null && !updated[i][j].isFixed()) {
+                    blockStates[i][j] = updated[i][j];
+                }
+            }
+        }
     }
 
     private void applyTransformMap(BlockState[][] array, Map<Vector2, BlockState> transformMap) {
@@ -251,8 +286,9 @@ public class GameState {
         for (int i = 0; i < blockStates.length; i++) {
             for (int j = 0; j < blockStates[i].length; j++) {
                 BlockState blockState = blockStates[i][j];
-                if (blockState != null && !blockState.isFixed()) {
+                if (blockState != null) {
                     blockState.setFixed(true);
+                    blockState.setBlockColor(Color.RED);
                 }
             }
         }
