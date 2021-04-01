@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.Color;
 public class BlockState {
     private Color blockColor;
     private boolean fixed;
+    private boolean pivot;
 
     public BlockState(Color blockColor) {
         this.blockColor = blockColor;
@@ -24,5 +25,13 @@ public class BlockState {
 
     public void setFixed(boolean fixed) {
         this.fixed = fixed;
+    }
+
+    public boolean isPivot() {
+        return pivot;
+    }
+
+    public void setPivot(boolean pivot) {
+        this.pivot = pivot;
     }
 }

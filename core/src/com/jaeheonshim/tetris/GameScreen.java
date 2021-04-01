@@ -1,6 +1,7 @@
 package com.jaeheonshim.tetris;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -36,6 +37,18 @@ public class GameScreen implements Screen {
         if(blockUpdateTimer <= 0) {
             blockUpdateTimer = 0.5f;
             gameScene.getGameState().tickBlocks();
+        }
+
+        if(Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
+            gameScene.getGameState().rotateMoving();
+        }
+
+        if(Gdx.input.isKeyJustPressed(Input.Keys.LEFT)) {
+            gameScene.getGameState().translateMoving(-1);
+        }
+
+        if(Gdx.input.isKeyJustPressed(Input.Keys.RIGHT)) {
+            gameScene.getGameState().translateMoving(1);
         }
     }
 
