@@ -11,12 +11,32 @@ public class GameScene {
     private int innerGameHeight = 20;
     private float tileWidth = 32;
 
+    private GameState gameState = new GameState(innerGameWidth, innerGameHeight);
+
     public void draw(float x, float y, SpriteBatch spriteBatch, ShapeRenderer shapeRenderer) {
+        spriteBatch.setColor(Color.WHITE);
+
         drawFrame(x, y, spriteBatch);
         drawGridLines(x, y, shapeRenderer);
+        drawGame(x, y, spriteBatch);
+    }
+
+    private void drawGame(float x, float y, SpriteBatch spriteBatch) {
+        BlockState[][] states = gameState.getBlockStates();
+
+        for(int i = 0; i < states.length; i++) {
+            for(int j = 0; j < states[i].length; j++) {
+                BlockState state = states[i][j];
+                if(state != null) {
+                    spriteBatch.setColor(state.getBlockColor());
+                    spriteBatch.draw(blockTexture, x + tileWidth * (j + 1), y + ((innerGameHeight + 1) * tileWidth) - tileWidth * (i + 1));
+                }
+            }
+        }
     }
 
     private void drawFrame(float x, float y, SpriteBatch spriteBatch) {
+        spriteBatch.setColor(Color.GRAY);
         // draw left and right
         for(int i = 0; i < innerGameHeight + 1; i++) {
             spriteBatch.draw(blockTexture, x, y + tileWidth * i + tileWidth);
