@@ -35,7 +35,7 @@ public class GameScreen implements Screen {
     public void update(float delta) {
         blockUpdateTimer -= delta;
         if(blockUpdateTimer <= 0) {
-            blockUpdateTimer = 0.5f;
+            blockUpdateTimer = 1;
             gameScene.getGameState().tickBlocks();
         }
 

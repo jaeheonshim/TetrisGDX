@@ -4,7 +4,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class GameState {
     private int width;
@@ -13,21 +12,78 @@ public class GameState {
     private int currentRotation = 0;
 
     private BlockState[][] blockStates;
+    private BlockType currentDrop;
 
     public GameState(int width, int height) {
         this.width = width;
         this.height = height;
 
         blockStates = new BlockState[height][width];
-        blockStates[2][0] = new BlockState(Color.valueOf("0341AE"));
-        blockStates[2][1] = new BlockState(Color.valueOf("0341AE"));
-        blockStates[2][1].setPivot(true);
-        blockStates[1][1] = new BlockState(Color.valueOf("0341AE"));
-        blockStates[2][2] = new BlockState(Color.valueOf("0341AE"));
+//        blockStates[2][0] = new BlockState(Color.valueOf("0341AE"));
+//        blockStates[2][1] = new BlockState(Color.valueOf("0341AE"));
+//        blockStates[2][1].setPivot(true);
+//        blockStates[1][1] = new BlockState(Color.valueOf("0341AE"));
+//        blockStates[2][2] = new BlockState(Color.valueOf("0341AE"));
+        spawnBlock(BlockType.I, Color.GREEN);
     }
 
     public BlockState[][] getBlockStates() {
         return blockStates;
+    }
+
+    public void spawnBlock(BlockType blockType, Color c) {
+        currentDrop = blockType;
+        switch(blockType) {
+            case I: {
+                blockStates[0][width / 2 - 2] = new BlockState(c);
+                blockStates[0][width / 2 - 1] = new BlockState(c);
+                blockStates[0][width / 2] = new BlockState(Color.BLUE).setPivot(true);
+                blockStates[0][width / 2 + 1] = new BlockState(c);
+                break;
+            }
+            case J: {
+                blockStates[0][width / 2 - 2] = new BlockState(c);
+                blockStates[1][width / 2 - 2] = new BlockState(c);
+                blockStates[1][width / 2 - 1] = new BlockState(c).setPivot(true);
+                blockStates[1][width / 2] = new BlockState(c);
+                break;
+            }
+            case L: {
+                blockStates[0][width / 2] = new BlockState(c);
+                blockStates[1][width / 2 - 2] = new BlockState(c);
+                blockStates[1][width / 2 - 1] = new BlockState(c).setPivot(true);
+                blockStates[1][width / 2] = new BlockState(c);
+                break;
+            }
+            case O: {
+                blockStates[0][width / 2 - 1] = new BlockState(c);
+                blockStates[0][width / 2] = new BlockState(c);
+                blockStates[1][width / 2 - 1] = new BlockState(c);
+                blockStates[1][width / 2] = new BlockState(c);
+                break;
+            }
+            case S: {
+                blockStates[0][width / 2 - 1] = new BlockState(c);
+                blockStates[0][width / 2] = new BlockState(c);
+                blockStates[1][width / 2 - 2] = new BlockState(c);
+                blockStates[1][width / 2 - 1] = new BlockState(c).setPivot(true);
+                break;
+            }
+            case T: {
+                blockStates[0][width / 2 - 1] = new BlockState(c);
+                blockStates[1][width / 2 - 2] = new BlockState(c);
+                blockStates[1][width / 2 - 1] = new BlockState(c).setPivot(true);
+                blockStates[1][width / 2] = new BlockState(c);
+                break;
+            }
+            case Z: {
+                blockStates[0][width / 2 - 2] = new BlockState(c);
+                blockStates[0][width / 2 - 1] = new BlockState(c);
+                blockStates[1][width / 2 - 1] = new BlockState(c).setPivot(true);
+                blockStates[1][width / 2] = new BlockState(c);
+                break;
+            }
+        }
     }
 
     public void tickBlocks() {
@@ -68,6 +124,10 @@ public class GameState {
     public void rotateMoving() {
         Vector2 rotationPoint = getRotationPoint();
 
+        if(rotationPoint == null) {
+            return;
+        }
+
         BlockState[][] updatedStates = new BlockState[height][width];
         Map<Vector2, BlockState> transformedStates = new HashMap<>();
 
@@ -75,7 +135,7 @@ public class GameState {
             for (int j = 0; j < blockStates[i].length; j++) {
                 if (blockStates[i][j] != null && !blockStates[i][j].isFixed()) {
                     Vector2 originRelative = new Vector2(j, i).sub(rotationPoint);
-                    Vector2 transformed = new Vector2(originRelative.y * -1, originRelative.x).add(rotationPoint);
+                    Vector2 transformed = new Vector2(originRelative.y, originRelative.x * -1).add(rotationPoint);
 
                     transformedStates.put(transformed, blockStates[i][j]);
                 } else if (blockStates[i][j] != null) {
@@ -87,7 +147,8 @@ public class GameState {
         boolean transformSuccess = false;
         Vector2[] kickDataSet = getKickDataSet();
         for (int k = 0; k < kickDataSet.length; k++) {
-            if (validVectorSet(transformSet(transformedStates.keySet(), kickDataSet[k]))) {
+            if (validVectorSet(transformSet(transformedStates.keySet(), kickDataSet[k], false))) {
+                transformSet(transformedStates.keySet(), kickDataSet[k], true);
                 applyTransformMap(updatedStates, transformedStates);
                 transformSuccess = true;
                 break;
@@ -106,10 +167,14 @@ public class GameState {
         }
     }
 
-    private Collection<Vector2> transformSet(Collection<Vector2> vector2s, Vector2 transformation) {
+    private Collection<Vector2> transformSet(Collection<Vector2> vector2s, Vector2 transformation, boolean mutate) {
         List<Vector2> trans = new ArrayList<>();
         for (Vector2 vector2 : vector2s) {
-            trans.add(vector2.add(transformation));
+            if(mutate) {
+                trans.add(vector2.add(transformation));
+            } else {
+                trans.add(new Vector2(vector2).add(transformation));
+            }
         }
 
         return trans;
@@ -128,14 +193,30 @@ public class GameState {
     }
 
     private Vector2[] getKickDataSet() {
-        if (currentRotation % 4 == 0) {
-            return KickData.kickData[0];
-        } else if (currentRotation % 4 == 2) {
-            return KickData.kickData[3];
-        } else if (currentRotation % 4 == 3) {
-            return KickData.kickData[6];
+        if(currentDrop == BlockType.I) {
+            if (currentRotation % 4 == 0) {
+                System.out.println("Using " + 0);
+                return KickData.I[0];
+            } else if (currentRotation % 4 == 1) {
+                System.out.println("Using " + 2);
+                return KickData.I[2];
+            } else if (currentRotation % 4 == 2) {
+                System.out.println("Using " + 4);
+                return KickData.I[4];
+            } else {
+                System.out.println("Using " + 6);
+                return KickData.I[6];
+            }
         } else {
-            return KickData.kickData[2];
+            if (currentRotation % 4 == 0) {
+                return KickData.JLSTZ[0];
+            } else if (currentRotation % 4 == 2) {
+                return KickData.JLSTZ[3];
+            } else if (currentRotation % 4 == 3) {
+                return KickData.JLSTZ[6];
+            } else {
+                return KickData.JLSTZ[2];
+            }
         }
     }
 

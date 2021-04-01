@@ -31,7 +31,8 @@ public class BlockState {
         return pivot;
     }
 
-    public void setPivot(boolean pivot) {
+    public BlockState setPivot(boolean pivot) {
         this.pivot = pivot;
+        return this;
     }
 }
