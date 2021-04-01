@@ -1,9 +1,12 @@
 package com.jaeheonshim.tetris;
 
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.jaeheonshim.tetris.game.BlockState;
+import com.jaeheonshim.tetris.game.GameState;
 
 public class GameScene {
     private Texture blockTexture = new Texture("Block.png");

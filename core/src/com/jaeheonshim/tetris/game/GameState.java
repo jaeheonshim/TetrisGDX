@@ -1,7 +1,8 @@
-package com.jaeheonshim.tetris;
+package com.jaeheonshim.tetris.game;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
+import com.jaeheonshim.tetris.GameStateListener;
 
 import java.util.*;
 
@@ -14,6 +15,8 @@ public class GameState {
     private BlockState[][] blockStates;
     private BlockType currentDrop;
 
+    private GameStateListener stateListener;
+
     public GameState(int width, int height) {
         this.width = width;
         this.height = height;
@@ -24,7 +27,7 @@ public class GameState {
 //        blockStates[2][1].setPivot(true);
 //        blockStates[1][1] = new BlockState(Color.valueOf("0341AE"));
 //        blockStates[2][2] = new BlockState(Color.valueOf("0341AE"));
-        spawnBlock(BlockType.I, Color.GREEN);
+//        spawnBlock(BlockType.I, Color.GREEN);
     }
 
     public BlockState[][] getBlockStates() {
@@ -37,7 +40,7 @@ public class GameState {
             case I: {
                 blockStates[0][width / 2 - 2] = new BlockState(c);
                 blockStates[0][width / 2 - 1] = new BlockState(c);
-                blockStates[0][width / 2] = new BlockState(Color.BLUE).setPivot(true);
+                blockStates[0][width / 2] = new BlockState(c).setPivot(true);
                 blockStates[0][width / 2 + 1] = new BlockState(c);
                 break;
             }
@@ -159,6 +162,18 @@ public class GameState {
             this.blockStates = updatedStates;
             currentRotation++;
         }
+    }
+
+    public boolean newBlockReady() {
+        for(int i = 0; i < blockStates.length; i++) {
+            for(int j = 0; j < blockStates[i].length; j++) {
+                if(blockStates[i][j] != null && !blockStates[i][j].isFixed()) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
     private void applyTransformMap(BlockState[][] array, Map<Vector2, BlockState> transformMap) {

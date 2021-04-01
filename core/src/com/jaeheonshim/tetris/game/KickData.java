@@ -1,4 +1,4 @@
-package com.jaeheonshim.tetris;
+package com.jaeheonshim.tetris.game;
 
 import com.badlogic.gdx.math.Vector;
 import com.badlogic.gdx.math.Vector2;

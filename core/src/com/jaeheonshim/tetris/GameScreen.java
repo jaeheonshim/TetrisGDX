@@ -3,12 +3,16 @@ package com.jaeheonshim.tetris;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.jaeheonshim.tetris.game.BlockType;
+
+import java.util.Random;
 
 public class GameScreen implements Screen {
     private Viewport viewport;
@@ -17,7 +21,14 @@ public class GameScreen implements Screen {
     private SpriteBatch spriteBatch;
     private ShapeRenderer shapeRenderer;
 
+    private Random random = new Random();
+
     private float blockUpdateTimer = 1;
+
+    private DelayedIntervalKeypressListener leftListener = new DelayedIntervalKeypressListener(Input.Keys.LEFT, 0.1f);
+    private DelayedIntervalKeypressListener rightListener = new DelayedIntervalKeypressListener(Input.Keys.RIGHT, 0.1f);
+    private DelayedIntervalKeypressListener upListener = new DelayedIntervalKeypressListener(Input.Keys.UP, 0.3f);
+    private DelayedIntervalKeypressListener downListener = new DelayedIntervalKeypressListener(Input.Keys.DOWN, 0.07f);
 
     public GameScreen() {
         viewport = new FitViewport(700, 700);
@@ -33,21 +44,30 @@ public class GameScreen implements Screen {
     }
 
     public void update(float delta) {
+        leftListener.update(delta);
+        rightListener.update(delta);
+        upListener.update(delta);
+        downListener.update(delta);
+
         blockUpdateTimer -= delta;
-        if(blockUpdateTimer <= 0) {
+        if(blockUpdateTimer <= 0 || downListener.isPressed()) {
+            if(gameScene.getGameState().newBlockReady()) {
+                gameScene.getGameState().spawnBlock(BlockType.values()[random.nextInt(BlockType.values().length)], Color.GREEN);
+            } else {
+                gameScene.getGameState().tickBlocks();
+            }
             blockUpdateTimer = 1;
-            gameScene.getGameState().tickBlocks();
         }
 
-        if(Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
+        if(upListener.isPressed()) {
             gameScene.getGameState().rotateMoving();
         }
 
-        if(Gdx.input.isKeyJustPressed(Input.Keys.LEFT)) {
+        if(leftListener.isPressed()) {
             gameScene.getGameState().translateMoving(-1);
         }
 
-        if(Gdx.input.isKeyJustPressed(Input.Keys.RIGHT)) {
+        if(rightListener.isPressed()) {
             gameScene.getGameState().translateMoving(1);
         }
     }
