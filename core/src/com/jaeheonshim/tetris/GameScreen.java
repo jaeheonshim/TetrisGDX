@@ -133,7 +133,7 @@ public class GameScreen implements Screen {
             }
         }
     }
-S
+
     @Override
     public void resize(int width, int height) {
         backgroundViewport.update(width, height, true);
