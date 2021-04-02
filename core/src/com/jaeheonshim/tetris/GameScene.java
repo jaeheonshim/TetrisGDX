@@ -19,9 +19,23 @@ public class GameScene {
     public void draw(float x, float y, SpriteBatch spriteBatch, ShapeRenderer shapeRenderer) {
         spriteBatch.setColor(Color.WHITE);
 
-        drawFrame(x, y, spriteBatch);
+        //shapeRenderer.setColor(Color.BLACK);
+        //shapeRenderer.rect(x, y, x + (innerGameWidth + 2) * tileWidth, y + (innerGameHeight + 2) * tileWidth);
+
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        shapeRenderer.setAutoShapeType(true);
+        shapeRenderer.setColor(Color.BLACK);
+        shapeRenderer.rect(x, y, (innerGameWidth + 2) * tileWidth, (innerGameHeight + 2) * tileWidth);
+        shapeRenderer.end();
+
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
         drawGridLines(x, y, shapeRenderer);
+        shapeRenderer.end();
+
+        spriteBatch.begin();
+        drawFrame(x, y, spriteBatch);
         drawGame(x, y, spriteBatch);
+        spriteBatch.end();
     }
 
     private void drawGame(float x, float y, SpriteBatch spriteBatch) {

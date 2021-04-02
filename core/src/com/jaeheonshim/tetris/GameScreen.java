@@ -6,8 +6,10 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.jaeheonshim.tetris.game.BlockType;
@@ -17,6 +19,7 @@ import java.util.Random;
 
 public class GameScreen implements Screen {
     private Viewport viewport;
+    private Viewport backgroundViewport;
     private GameScene gameScene;
 
     private SpriteBatch spriteBatch;
@@ -26,6 +29,9 @@ public class GameScreen implements Screen {
 
     private float blockUpdateTimer = 1;
 
+    private Texture backgroundTexture = new Texture("backgroundtile.png");
+    private float backgroundScaling = 0.1f;
+
     private DelayedIntervalKeypressListener leftListener = new DelayedIntervalKeypressListener(Input.Keys.LEFT, 0.1f);
     private DelayedIntervalKeypressListener rightListener = new DelayedIntervalKeypressListener(Input.Keys.RIGHT, 0.1f);
     private DelayedIntervalKeypressListener upListener = new DelayedIntervalKeypressListener(Input.Keys.UP, 0.3f);
@@ -33,6 +39,7 @@ public class GameScreen implements Screen {
 
     public GameScreen() {
         viewport = new FitViewport(700, 900);
+        backgroundViewport = new ExtendViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
         gameScene = new GameScene();
         spriteBatch = new SpriteBatch();
@@ -51,24 +58,28 @@ public class GameScreen implements Screen {
         downListener.update(delta);
 
         blockUpdateTimer -= delta;
-        if(blockUpdateTimer <= 0 || downListener.isPressed()) {
-            if(gameScene.getGameState().newBlockReady()) {
-                gameScene.getGameState().spawnBlock(BlockType.values()[random.nextInt(BlockType.values().length)], GameState.COLORS[random.nextInt(GameState.COLORS.length)]);
-            } else {
-                gameScene.getGameState().tickBlocks();
+        if (downListener.isPressed()) {
+            gameScene.getGameState().tickBlocks();
+        } else if (blockUpdateTimer <= 0) {
+            if (!gameScene.getGameState().clearRows()) {
+                if (gameScene.getGameState().newBlockReady()) {
+                    gameScene.getGameState().spawnBlock(BlockType.values()[random.nextInt(BlockType.values().length)], GameState.COLORS[random.nextInt(GameState.COLORS.length)]);
+                } else {
+                    gameScene.getGameState().tickBlocks();
+                }
             }
             blockUpdateTimer = 1;
         }
 
-        if(upListener.isPressed()) {
+        if (upListener.isPressed()) {
             gameScene.getGameState().rotateMoving();
         }
 
-        if(leftListener.isPressed()) {
+        if (leftListener.isPressed()) {
             gameScene.getGameState().translateMoving(-1);
         }
 
-        if(rightListener.isPressed()) {
+        if (rightListener.isPressed()) {
             gameScene.getGameState().translateMoving(1);
         }
     }
@@ -80,11 +91,17 @@ public class GameScreen implements Screen {
 
         update(delta);
 
-        spriteBatch.setProjectionMatrix(viewport.getCamera().combined);
+        spriteBatch.setProjectionMatrix(backgroundViewport.getCamera().combined);
         shapeRenderer.setProjectionMatrix(viewport.getCamera().combined);
 
         spriteBatch.begin();
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+        spriteBatch.setColor(Color.WHITE);
+        backgroundViewport.apply();
+        renderBackgroundTiles(spriteBatch);
+        spriteBatch.end();
+
+        viewport.apply();
+        spriteBatch.setProjectionMatrix(viewport.getCamera().combined);
 
         gameScene.draw(
                 Util.getViewportCenterCoordinateX(viewport, gameScene.getInnerGameWidthDimension()),
@@ -92,14 +109,36 @@ public class GameScreen implements Screen {
                 spriteBatch,
                 shapeRenderer
         );
-
-        spriteBatch.end();
-        shapeRenderer.end();
     }
 
+    private void renderBackgroundTiles(SpriteBatch spriteBatch) {
+        spriteBatch.setColor(Color.LIGHT_GRAY);
+        for (int i = 0; i < backgroundViewport.getWorldWidth() / (backgroundTexture.getWidth() * backgroundScaling); i++) {
+            for (int j = 0; j < backgroundViewport.getWorldHeight() / (backgroundTexture.getHeight() * backgroundScaling); j++) {
+                spriteBatch.draw(backgroundTexture,
+                        i * backgroundTexture.getWidth() * backgroundScaling,
+                        j * backgroundTexture.getHeight() * backgroundScaling,
+                        backgroundTexture.getWidth() / 2f * backgroundScaling,
+                        backgroundTexture.getHeight() / 2f * backgroundScaling,
+                        backgroundTexture.getWidth() * backgroundScaling,
+                        backgroundTexture.getHeight() * backgroundScaling,
+                        1,
+                        1,
+                        0,
+                        0, 0,
+                        backgroundTexture.getWidth(),
+                        backgroundTexture.getHeight(),
+                        false, false
+                );
+            }
+        }
+    }
+S
     @Override
     public void resize(int width, int height) {
+        backgroundViewport.update(width, height, true);
         viewport.update(width, height, true);
+
     }
 
     @Override

@@ -294,4 +294,29 @@ public class GameState {
             }
         }
     }
+
+    public boolean clearRows() {
+        boolean cleared = false;
+
+        rowLoop: for(int i = height - 1; i >= 0; i--) {
+            for(int j = 0; j < width; j++) {
+                if(blockStates[i][j] == null) {
+                    continue rowLoop;
+                }
+            }
+
+            cleared = true;
+            for(int j = 0; j < width; j++) {
+                blockStates[i][j] = null;
+            }
+            for(int j = i; j > 0; j--) {
+                for(int k = 0; k < width; k++) {
+                    blockStates[j][k] = blockStates[j - 1][k];
+                }
+            }
+            i++;
+        }
+
+        return cleared;
+    }
 }
