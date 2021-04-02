@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.jaeheonshim.tetris.game.BlockType;
+import com.jaeheonshim.tetris.game.GameState;
 
 import java.util.Random;
 
@@ -31,7 +32,7 @@ public class GameScreen implements Screen {
     private DelayedIntervalKeypressListener downListener = new DelayedIntervalKeypressListener(Input.Keys.DOWN, 0.07f);
 
     public GameScreen() {
-        viewport = new FitViewport(700, 700);
+        viewport = new FitViewport(700, 900);
 
         gameScene = new GameScene();
         spriteBatch = new SpriteBatch();
@@ -52,7 +53,7 @@ public class GameScreen implements Screen {
         blockUpdateTimer -= delta;
         if(blockUpdateTimer <= 0 || downListener.isPressed()) {
             if(gameScene.getGameState().newBlockReady()) {
-                gameScene.getGameState().spawnBlock(BlockType.values()[random.nextInt(BlockType.values().length)], Color.GREEN);
+                gameScene.getGameState().spawnBlock(BlockType.values()[random.nextInt(BlockType.values().length)], GameState.COLORS[random.nextInt(GameState.COLORS.length)]);
             } else {
                 gameScene.getGameState().tickBlocks();
             }

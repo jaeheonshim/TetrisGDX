@@ -17,6 +17,8 @@ public class GameState {
 
     private GameStateListener stateListener;
 
+    public static final Color[] COLORS = {Color.valueOf("0341AE"), Color.valueOf("72CB3B"), Color.valueOf("FFD500"), Color.valueOf("FF971C"), Color.valueOf("FF3213")};
+
     public GameState(int width, int height) {
         this.width = width;
         this.height = height;
@@ -146,7 +148,7 @@ public class GameState {
             for (int j = 0; j < blockStates[i].length; j++) {
                 if (blockStates[i][j] != null && !blockStates[i][j].isFixed()) {
                     Vector2 originRelative = new Vector2(j, i).sub(rotationPoint);
-                    Vector2 transformed = new Vector2(originRelative.y, originRelative.x * -1).add(rotationPoint);
+                    Vector2 transformed = new Vector2(originRelative.y * -1, originRelative.x).add(rotationPoint);
 
                     transformedStates.put(transformed, blockStates[i][j]);
                 } else if (blockStates[i][j] != null) {
@@ -288,7 +290,6 @@ public class GameState {
                 BlockState blockState = blockStates[i][j];
                 if (blockState != null) {
                     blockState.setFixed(true);
-                    blockState.setBlockColor(Color.RED);
                 }
             }
         }
