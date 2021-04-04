@@ -24,6 +24,7 @@ public class GameScreen implements Screen {
     private GameScene gameScene;
     private GameDetailPanel gameDetailPanel;
     private LinesClearedPanel linesClearedPanel;
+    private LevelPanel levelPanel;
 
     private SpriteBatch spriteBatch;
     private ShapeRenderer shapeRenderer;
@@ -51,6 +52,7 @@ public class GameScreen implements Screen {
         gameDetailPanel = new GameDetailPanel();
         linesClearedPanel = new LinesClearedPanel();
         linesClearedPanel.setWidth(gameScene.getInnerGameWidthDimension());
+        levelPanel = new LevelPanel();
     }
 
     @Override
@@ -68,6 +70,7 @@ public class GameScreen implements Screen {
         gameScene.getGameState().doGameTick(delta, downListener.isPressed());
         gameDetailPanel.setScore(gameScene.getGameState().getScore().get());
         linesClearedPanel.setLinesCleared(gameScene.getGameState().getLinesCleared().get());
+        levelPanel.setLevel(gameScene.getGameState().getLevel().get());
 
         if (upListener.isPressed()) {
             gameScene.getGameState().rotateMoving();
@@ -113,6 +116,7 @@ public class GameScreen implements Screen {
 
         gameDetailPanel.draw(gameCenterCoordinateX + gameScene.getInnerGameWidthDimension() + 20, gameCenterCoordinateY + gameScene.getInnerGameHeightDimension() - gameDetailPanel.getHeight(), spriteBatch);
         linesClearedPanel.draw(gameCenterCoordinateX, gameCenterCoordinateY + gameScene.getInnerGameHeightDimension() + 10, spriteBatch);
+        levelPanel.draw(gameCenterCoordinateX + gameScene.getInnerGameWidthDimension() + 20, gameCenterCoordinateY + gameScene.getInnerGameHeightDimension() - gameDetailPanel.getHeight() - levelPanel.getHeight() - 20, spriteBatch);
     }
 
     private void renderBackgroundTiles(SpriteBatch spriteBatch) {
