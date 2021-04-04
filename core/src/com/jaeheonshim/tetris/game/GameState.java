@@ -9,7 +9,7 @@ import com.jaeheonshim.tetris.util.Util;
 import java.util.*;
 
 public class GameState {
-    private Random random = new Random();
+    private static Random random = new Random();
 
     private ObfuscatedMemoryInteger level = new ObfuscatedMemoryInteger(0);
     private ObfuscatedMemoryInteger score = new ObfuscatedMemoryInteger(0);
@@ -23,6 +23,8 @@ public class GameState {
     private BlockState[][] blockStates;
     private BlockType currentDrop;
     private Timer dropTimer = new Timer(Util.getLevelSpeed(level.get()));
+
+    private BlockType nextDrop = randomBlockType();
 
     public static final Color[] COLORS = {Color.valueOf("0341AE"), Color.valueOf("72CB3B"), Color.valueOf("FFD500"), Color.valueOf("FF971C"), Color.valueOf("FF3213")};
 
@@ -111,7 +113,8 @@ public class GameState {
                     advanceLevel();
                 }
             } else if (newBlockReady()) {
-                spawnBlock(BlockType.values()[random.nextInt(BlockType.values().length)], GameState.COLORS[random.nextInt(GameState.COLORS.length)]);
+                spawnBlock(nextDrop, randomColor());
+                nextDrop = randomBlockType();
             } else {
                 tickBlocks();
             }
@@ -380,5 +383,17 @@ public class GameState {
 
     public ObfuscatedMemoryInteger getLinesCleared() {
         return linesCleared;
+    }
+
+    public BlockType randomBlockType() {
+        return BlockType.values()[random.nextInt(BlockType.values().length)];
+    }
+
+    public static Color randomColor() {
+        return GameState.COLORS[random.nextInt(GameState.COLORS.length)];
+    }
+
+    public BlockType getNextDrop() {
+        return nextDrop;
     }
 }

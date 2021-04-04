@@ -28,6 +28,8 @@ public class LevelPanel {
 
     public void draw(float x, float y, SpriteBatch spriteBatch) {
         spriteBatch.begin();
+        spriteBatch.setColor(Color.WHITE);
+
         boxFrame.draw(spriteBatch, x, y, width, height);
 
         String text = String.format("LEVEL\n%d", level);
