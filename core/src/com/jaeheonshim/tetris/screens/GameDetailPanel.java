@@ -18,6 +18,10 @@ public class GameDetailPanel {
     private float paddingX = 18;
     private float paddingY = 25;
 
+    private int score;
+    private int best;
+    private int record;
+
     public GameDetailPanel() {
         boxFrame = new NinePatch(new Texture(Gdx.files.internal("BoxFrame.png")), 9, 9, 9, 9);
         font = new BitmapFont(Gdx.files.internal("fonts/tetris.fnt"));
@@ -33,7 +37,7 @@ public class GameDetailPanel {
         boxFrame.draw(spriteBatch, x, y, width, height);
 
         glyphLayout.setText(font, "SCORE");
-        font.draw(spriteBatch, "SCORE\n000000\n\nBEST\n000000\n\nRECORD\n000000", x + paddingX, y + height - paddingY);
+        font.draw(spriteBatch, String.format("SCORE\n%06d\n\nBEST\n%06d\n\nRECORD\n%06d", score, best, record), x + paddingX, y + height - paddingY);
 
 
         spriteBatch.end();
@@ -45,5 +49,29 @@ public class GameDetailPanel {
 
     public float getHeight() {
         return height;
+    }
+
+    public int getScore() {
+        return score;
+    }
+
+    public void setScore(int score) {
+        this.score = score;
+    }
+
+    public int getBest() {
+        return best;
+    }
+
+    public void setBest(int best) {
+        this.best = best;
+    }
+
+    public int getRecord() {
+        return record;
+    }
+
+    public void setRecord(int record) {
+        this.record = record;
     }
 }

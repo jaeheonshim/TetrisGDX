@@ -2,10 +2,19 @@ package com.jaeheonshim.tetris.game;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
+import com.jaeheonshim.tetris.util.ObfuscatedMemoryInteger;
+import com.jaeheonshim.tetris.util.Timer;
+import com.jaeheonshim.tetris.util.Util;
 
 import java.util.*;
 
 public class GameState {
+    private Random random = new Random();
+
+    private ObfuscatedMemoryInteger level = new ObfuscatedMemoryInteger(0);
+    private ObfuscatedMemoryInteger score = new ObfuscatedMemoryInteger(0);
+    private ObfuscatedMemoryInteger linesCleared = new ObfuscatedMemoryInteger(0);
+
     private int width;
     private int height;
 
@@ -13,6 +22,7 @@ public class GameState {
 
     private BlockState[][] blockStates;
     private BlockType currentDrop;
+    private Timer dropTimer = new Timer(Util.getLevelSpeed(level.get()));
 
     public static final Color[] COLORS = {Color.valueOf("0341AE"), Color.valueOf("72CB3B"), Color.valueOf("FFD500"), Color.valueOf("FF971C"), Color.valueOf("FF3213")};
 
@@ -35,7 +45,7 @@ public class GameState {
 
     public void spawnBlock(BlockType blockType, Color c) {
         currentDrop = blockType;
-        switch(blockType) {
+        switch (blockType) {
             case I: {
                 blockStates[0][width / 2 - 2] = new BlockState(c);
                 blockStates[0][width / 2 - 1] = new BlockState(c);
@@ -88,6 +98,38 @@ public class GameState {
         }
     }
 
+    public void doGameTick(float delta, boolean drop) {
+        if (dropTimer.isReady()) {
+            // we want to clear rows and spawn blocks only when the timer goes off, not when the block is "fast-dropped"
+            int clearedCount = clearRows();
+            if (clearedCount > 0) {
+                score.set(score.get() + getScoring(clearedCount));
+                int prevCount = linesCleared.get() / 10;
+                linesCleared.set(linesCleared.get() + clearedCount);
+
+                if(linesCleared.get() / 10 > prevCount) {
+                    advanceLevel();
+                }
+            } else if (newBlockReady()) {
+                spawnBlock(BlockType.values()[random.nextInt(BlockType.values().length)], GameState.COLORS[random.nextInt(GameState.COLORS.length)]);
+            } else {
+                tickBlocks();
+            }
+            dropTimer.reset();
+        } else if(drop) {
+            tickBlocks();
+        }
+
+        if (!drop) {
+            dropTimer.update(delta);
+        }
+    }
+
+    private void advanceLevel() {
+        level.set(level.get() + 1);
+        dropTimer.setValue(Util.getLevelSpeed(level.get()));
+    }
+
     public void tickBlocks() {
         BlockState[][] updated = new BlockState[height][width];
 
@@ -104,7 +146,7 @@ public class GameState {
             }
         }
 
-        if(isValidUpdate(updated)) {
+        if (isValidUpdate(updated)) {
             applyUpdated(updated);
         } else {
             fixMoving();
@@ -127,14 +169,14 @@ public class GameState {
             }
         }
 
-        if(isValidUpdate(updatedState))
+        if (isValidUpdate(updatedState))
             applyUpdated(updatedState);
     }
 
     public void rotateMoving() {
         Vector2 rotationPoint = getRotationPoint();
 
-        if(rotationPoint == null) {
+        if (rotationPoint == null) {
             return;
         }
 
@@ -165,17 +207,17 @@ public class GameState {
             }
         }
 
-        if(transformSuccess) {
-            if(isValidUpdate(updatedStates))
+        if (transformSuccess) {
+            if (isValidUpdate(updatedStates))
                 applyUpdated(updatedStates);
             currentRotation++;
         }
     }
 
     public boolean newBlockReady() {
-        for(int i = 0; i < blockStates.length; i++) {
-            for(int j = 0; j < blockStates[i].length; j++) {
-                if(blockStates[i][j] != null && !blockStates[i][j].isFixed()) {
+        for (int i = 0; i < blockStates.length; i++) {
+            for (int j = 0; j < blockStates[i].length; j++) {
+                if (blockStates[i][j] != null && !blockStates[i][j].isFixed()) {
                     return false;
                 }
             }
@@ -185,9 +227,9 @@ public class GameState {
     }
 
     private boolean isValidUpdate(BlockState[][] update) {
-        for(int i = 0; i < blockStates.length; i++) {
-            for(int j = 0; j < blockStates[j].length; j++) {
-                if(update[i][j] != null && !update[i][j].isFixed() && blockStates[i][j] != null && blockStates[i][j].isFixed()) {
+        for (int i = 0; i < blockStates.length; i++) {
+            for (int j = 0; j < blockStates[j].length; j++) {
+                if (update[i][j] != null && !update[i][j].isFixed() && blockStates[i][j] != null && blockStates[i][j].isFixed()) {
                     return false;
                 }
             }
@@ -197,13 +239,13 @@ public class GameState {
     }
 
     private void applyUpdated(BlockState[][] updated) {
-        for(int i = 0; i < updated.length; i++) {
-            for(int j = 0; j < updated[i].length; j++) {
-                if(blockStates[i][j] != null && !blockStates[i][j].isFixed()) {
+        for (int i = 0; i < updated.length; i++) {
+            for (int j = 0; j < updated[i].length; j++) {
+                if (blockStates[i][j] != null && !blockStates[i][j].isFixed()) {
                     blockStates[i][j] = null;
                 }
 
-                if(updated[i][j] != null && !updated[i][j].isFixed()) {
+                if (updated[i][j] != null && !updated[i][j].isFixed()) {
                     blockStates[i][j] = updated[i][j];
                 }
             }
@@ -211,7 +253,7 @@ public class GameState {
     }
 
     private void applyTransformMap(BlockState[][] array, Map<Vector2, BlockState> transformMap) {
-        for(Map.Entry<Vector2, BlockState> entry : transformMap.entrySet()) {
+        for (Map.Entry<Vector2, BlockState> entry : transformMap.entrySet()) {
             array[(int) entry.getKey().y][(int) entry.getKey().x] = entry.getValue();
         }
     }
@@ -219,7 +261,7 @@ public class GameState {
     private Collection<Vector2> transformSet(Collection<Vector2> vector2s, Vector2 transformation, boolean mutate) {
         List<Vector2> trans = new ArrayList<>();
         for (Vector2 vector2 : vector2s) {
-            if(mutate) {
+            if (mutate) {
                 trans.add(vector2.add(transformation));
             } else {
                 trans.add(new Vector2(vector2).add(transformation));
@@ -242,18 +284,14 @@ public class GameState {
     }
 
     private Vector2[] getKickDataSet() {
-        if(currentDrop == BlockType.I) {
+        if (currentDrop == BlockType.I) {
             if (currentRotation % 4 == 0) {
-                System.out.println("Using " + 0);
                 return KickData.I[0];
             } else if (currentRotation % 4 == 1) {
-                System.out.println("Using " + 2);
                 return KickData.I[2];
             } else if (currentRotation % 4 == 2) {
-                System.out.println("Using " + 4);
                 return KickData.I[4];
             } else {
-                System.out.println("Using " + 6);
                 return KickData.I[6];
             }
         } else {
@@ -292,28 +330,51 @@ public class GameState {
         }
     }
 
-    public boolean clearRows() {
+    public int clearRows() {
         boolean cleared = false;
+        int clearedCount = 0;
 
-        rowLoop: for(int i = height - 1; i >= 0; i--) {
-            for(int j = 0; j < width; j++) {
-                if(blockStates[i][j] == null) {
+        rowLoop:
+        for (int i = height - 1; i >= 0; i--) {
+            for (int j = 0; j < width; j++) {
+                if (blockStates[i][j] == null || !blockStates[i][j].isFixed()) {
                     continue rowLoop;
                 }
             }
 
             cleared = true;
-            for(int j = 0; j < width; j++) {
+            for (int j = 0; j < width; j++) {
                 blockStates[i][j] = null;
             }
-            for(int j = i; j > 0; j--) {
-                for(int k = 0; k < width; k++) {
+            for (int j = i; j > 0; j--) {
+                for (int k = 0; k < width; k++) {
                     blockStates[j][k] = blockStates[j - 1][k];
                 }
             }
+            clearedCount++;
             i++;
         }
 
-        return cleared;
+        return clearedCount;
+    }
+
+    private int getScoring(int cleared) {
+        if (cleared == 1) {
+            return 40 * (level.get() + 1);
+        } else if (cleared == 2) {
+            return 100 * (level.get() + 1);
+        } else if (cleared == 3) {
+            return 300 * (level.get() + 1);
+        } else {
+            return 1200 * (level.get() - 1);
+        }
+    }
+
+    public ObfuscatedMemoryInteger getLevel() {
+        return level;
+    }
+
+    public ObfuscatedMemoryInteger getScore() {
+        return score;
     }
 }

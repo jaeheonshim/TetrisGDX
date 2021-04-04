@@ -43,4 +43,22 @@ public class Util {
             }
         }
     }
+
+    public static float getLevelSpeed(int level) {
+        if(level >= 0 && level <= 8) {
+            return (48 - (level * 5)) / 60f;
+        } else if(level == 9) {
+            return 6 / 60f;
+        } else if(level >= 10 && level <= 12) {
+            return 5 / 60f;
+        } else if(level >= 13 && level <= 15) {
+            return 4 / 60f;
+        } else if(level >= 16 && level <= 18) {
+            return 3 / 60f;
+        } else if(level >= 19 && level <= 28) {
+            return 2 / 60f;
+        } else {
+            return 1 / 60f;
+        }
+    }
 }

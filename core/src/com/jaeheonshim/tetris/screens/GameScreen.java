@@ -62,18 +62,8 @@ public class GameScreen implements Screen {
         downListener.update(delta);
 
         blockUpdateTimer -= delta;
-        if (downListener.isPressed()) {
-            gameScene.getGameState().tickBlocks();
-        } else if (blockUpdateTimer <= 0) {
-            if (!gameScene.getGameState().clearRows()) {
-                if (gameScene.getGameState().newBlockReady()) {
-                    gameScene.getGameState().spawnBlock(BlockType.values()[random.nextInt(BlockType.values().length)], GameState.COLORS[random.nextInt(GameState.COLORS.length)]);
-                } else {
-                    gameScene.getGameState().tickBlocks();
-                }
-            }
-            blockUpdateTimer = 1;
-        }
+        gameScene.getGameState().doGameTick(delta, downListener.isPressed());
+        gameDetailPanel.setScore(gameScene.getGameState().getScore().get());
 
         if (upListener.isPressed()) {
             gameScene.getGameState().rotateMoving();
