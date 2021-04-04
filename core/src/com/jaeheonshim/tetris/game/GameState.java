@@ -2,7 +2,6 @@ package com.jaeheonshim.tetris.game;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
-import com.jaeheonshim.tetris.GameStateListener;
 
 import java.util.*;
 
@@ -14,8 +13,6 @@ public class GameState {
 
     private BlockState[][] blockStates;
     private BlockType currentDrop;
-
-    private GameStateListener stateListener;
 
     public static final Color[] COLORS = {Color.valueOf("0341AE"), Color.valueOf("72CB3B"), Color.valueOf("FFD500"), Color.valueOf("FF971C"), Color.valueOf("FF3213")};
 

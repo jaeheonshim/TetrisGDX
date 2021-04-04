@@ -1,4 +1,4 @@
-package com.jaeheonshim.tetris;
+package com.jaeheonshim.tetris.screens;
 
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;

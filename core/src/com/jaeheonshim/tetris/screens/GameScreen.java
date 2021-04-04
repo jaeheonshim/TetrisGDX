@@ -1,17 +1,18 @@
-package com.jaeheonshim.tetris;
+package com.jaeheonshim.tetris.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.jaeheonshim.tetris.util.DelayedIntervalKeypressListener;
+import com.jaeheonshim.tetris.util.Util;
 import com.jaeheonshim.tetris.game.BlockType;
 import com.jaeheonshim.tetris.game.GameState;
 
@@ -21,6 +22,7 @@ public class GameScreen implements Screen {
     private Viewport viewport;
     private Viewport backgroundViewport;
     private GameScene gameScene;
+    private GameDetailPanel gameDetailPanel;
 
     private SpriteBatch spriteBatch;
     private ShapeRenderer shapeRenderer;
@@ -38,12 +40,14 @@ public class GameScreen implements Screen {
     private DelayedIntervalKeypressListener downListener = new DelayedIntervalKeypressListener(Input.Keys.DOWN, 0.07f);
 
     public GameScreen() {
-        viewport = new FitViewport(700, 900);
+        viewport = new FitViewport(900, 900);
         backgroundViewport = new ExtendViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
         gameScene = new GameScene();
         spriteBatch = new SpriteBatch();
         shapeRenderer = new ShapeRenderer();
+
+        gameDetailPanel = new GameDetailPanel();
     }
 
     @Override
@@ -103,12 +107,17 @@ public class GameScreen implements Screen {
         viewport.apply();
         spriteBatch.setProjectionMatrix(viewport.getCamera().combined);
 
+        float gameCenterCoordinateX = Util.getViewportCenterCoordinateX(viewport, gameScene.getInnerGameWidthDimension());
+        float gameCenterCoordinateY = Util.getViewportCenterCoordinateY(viewport, gameScene.getInnerGameHeightDimension());
+
         gameScene.draw(
-                Util.getViewportCenterCoordinateX(viewport, gameScene.getInnerGameWidthDimension()),
-                Util.getViewportCenterCoordinateY(viewport, gameScene.getInnerGameHeightDimension()),
+                gameCenterCoordinateX,
+                gameCenterCoordinateY,
                 spriteBatch,
                 shapeRenderer
         );
+
+        gameDetailPanel.draw(gameCenterCoordinateX + gameScene.getInnerGameWidthDimension() + 20, gameCenterCoordinateY + gameScene.getInnerGameHeightDimension() - gameDetailPanel.getHeight(), spriteBatch);
     }
 
     private void renderBackgroundTiles(SpriteBatch spriteBatch) {
@@ -138,7 +147,6 @@ public class GameScreen implements Screen {
     public void resize(int width, int height) {
         backgroundViewport.update(width, height, true);
         viewport.update(width, height, true);
-
     }
 
     @Override
@@ -158,6 +166,8 @@ public class GameScreen implements Screen {
 
     @Override
     public void dispose() {
-
+        spriteBatch.dispose();
+        shapeRenderer.dispose();
+        backgroundTexture.dispose();
     }
 }
