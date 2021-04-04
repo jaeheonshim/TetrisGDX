@@ -23,6 +23,7 @@ public class GameScreen implements Screen {
     private Viewport backgroundViewport;
     private GameScene gameScene;
     private GameDetailPanel gameDetailPanel;
+    private LinesClearedPanel linesClearedPanel;
 
     private SpriteBatch spriteBatch;
     private ShapeRenderer shapeRenderer;
@@ -48,6 +49,8 @@ public class GameScreen implements Screen {
         shapeRenderer = new ShapeRenderer();
 
         gameDetailPanel = new GameDetailPanel();
+        linesClearedPanel = new LinesClearedPanel();
+        linesClearedPanel.setWidth(gameScene.getInnerGameWidthDimension());
     }
 
     @Override
@@ -64,6 +67,7 @@ public class GameScreen implements Screen {
         blockUpdateTimer -= delta;
         gameScene.getGameState().doGameTick(delta, downListener.isPressed());
         gameDetailPanel.setScore(gameScene.getGameState().getScore().get());
+        linesClearedPanel.setLinesCleared(gameScene.getGameState().getLinesCleared().get());
 
         if (upListener.isPressed()) {
             gameScene.getGameState().rotateMoving();
@@ -108,6 +112,7 @@ public class GameScreen implements Screen {
         );
 
         gameDetailPanel.draw(gameCenterCoordinateX + gameScene.getInnerGameWidthDimension() + 20, gameCenterCoordinateY + gameScene.getInnerGameHeightDimension() - gameDetailPanel.getHeight(), spriteBatch);
+        linesClearedPanel.draw(gameCenterCoordinateX, gameCenterCoordinateY + gameScene.getInnerGameHeightDimension() + 10, spriteBatch);
     }
 
     private void renderBackgroundTiles(SpriteBatch spriteBatch) {

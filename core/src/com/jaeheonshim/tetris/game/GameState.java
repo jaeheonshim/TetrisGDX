@@ -377,4 +377,8 @@ public class GameState {
     public ObfuscatedMemoryInteger getScore() {
         return score;
     }
+
+    public ObfuscatedMemoryInteger getLinesCleared() {
+        return linesCleared;
+    }
 }
