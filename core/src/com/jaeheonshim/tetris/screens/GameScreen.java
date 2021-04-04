@@ -3,6 +3,7 @@ package com.jaeheonshim.tetris.screens;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
@@ -16,6 +17,9 @@ import com.jaeheonshim.tetris.util.Util;
 import com.jaeheonshim.tetris.game.BlockType;
 import com.jaeheonshim.tetris.game.GameState;
 
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.Random;
 
 public class GameScreen implements Screen {
@@ -42,6 +46,12 @@ public class GameScreen implements Screen {
     private DelayedIntervalKeypressListener upListener = new DelayedIntervalKeypressListener(Input.Keys.UP, 0.3f);
     private DelayedIntervalKeypressListener downListener = new DelayedIntervalKeypressListener(Input.Keys.DOWN, 0.07f);
 
+    private Music music = Gdx.audio.newMusic(Gdx.files.internal("audio/tetris.mp3"));
+
+    private Queue<Integer> keypressQueue = new LinkedList<>();
+    private Integer[] konami = {Input.Keys.UP, Input.Keys.UP, Input.Keys.DOWN, Input.Keys.DOWN, Input.Keys.LEFT, Input.Keys.RIGHT, Input.Keys.LEFT, Input.Keys.RIGHT, Input.Keys.B, Input.Keys.A};
+    private boolean konamiActivated = false;
+
     public GameScreen() {
         viewport = new FitViewport(900, 900);
         backgroundViewport = new ExtendViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -55,11 +65,14 @@ public class GameScreen implements Screen {
         linesClearedPanel.setWidth(gameScene.getInnerGameWidthDimension());
         levelPanel = new LevelPanel();
         nextDropPanel = new NextDropPanel();
+
+        music.setVolume(0.6f);
+        music.setLooping(true);
     }
 
     @Override
     public void show() {
-
+        music.play();
     }
 
     public void update(float delta) {
@@ -87,6 +100,13 @@ public class GameScreen implements Screen {
 
         if (rightListener.isPressed()) {
             gameScene.getGameState().translateMoving(1);
+        }
+
+        for(int key : konami) {
+            if(Gdx.input.isKeyJustPressed(key)) {
+                registerKeypress(key);
+                break;
+            }
         }
     }
 
@@ -146,6 +166,28 @@ public class GameScreen implements Screen {
                 );
             }
         }
+    }
+
+    private void registerKeypress(int key) {
+        keypressQueue.add(key);
+        if(keypressQueue.size() > 10) {
+            keypressQueue.poll();
+        }
+
+        if(Arrays.equals(keypressQueue.toArray(), konami) && !konamiActivated) {
+            activateCoolTheme();
+        }
+    }
+
+    private void activateCoolTheme() {
+        music.stop();
+        music = Gdx.audio.newMusic(Gdx.files.internal("audio/cooltheme.mp3"));
+        music.setVolume(0.6f);
+        music.setLooping(true);
+        music.play();
+        konamiActivated = true;
+
+        backgroundTexture = new Texture("coolbackgroundtile.png");
     }
 
     @Override
