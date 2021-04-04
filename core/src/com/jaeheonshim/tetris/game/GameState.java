@@ -120,7 +120,8 @@ public class GameState {
             }
             dropTimer.reset();
         } else if(drop) {
-            tickBlocks();
+            if(tickBlocks())
+                score.set(score.get() + 1);
         }
 
         if (!drop) {
@@ -133,7 +134,8 @@ public class GameState {
         dropTimer.setValue(Util.getLevelSpeed(level.get()));
     }
 
-    public void tickBlocks() {
+    public boolean tickBlocks() {
+        boolean blocksMoved = false;
         BlockState[][] updated = new BlockState[height][width];
 
         for (int i = blockStates.length - 1; i >= 0; i--) {
@@ -141,10 +143,11 @@ public class GameState {
                 BlockState blockState = blockStates[i][j];
                 if (blockState != null && !blockState.isFixed() && i + 1 < blockStates.length) {
                     updated[i + 1][j] = blockState;
+                    blocksMoved = true;
                 } else if (blockState != null && i + 1 >= blockStates.length && !blockState.isFixed()) {
                     fixMoving();
                     applyUpdated(updated);
-                    return;
+                    return true;
                 }
             }
         }
@@ -154,6 +157,8 @@ public class GameState {
         } else {
             fixMoving();
         }
+
+        return blocksMoved;
     }
 
     public void translateMoving(int x) {
