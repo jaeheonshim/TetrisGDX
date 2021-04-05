@@ -79,7 +79,7 @@ public class GameScreen implements Screen {
         preferences = Gdx.app.getPreferences(TetrisGame.PREFERENCES);
 
         viewport = new FitViewport(900, 900);
-        backgroundViewport = new ExtendViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        backgroundViewport = new ExtendViewport(200, 200);
 
         gameScene = new GameScene();
         spriteBatch = new SpriteBatch();
@@ -267,8 +267,14 @@ public class GameScreen implements Screen {
     private void toggleMusic() {
         if(music.isPlaying()) {
             music.stop();
+            preferences.putInteger("soundOn", 0);
+            preferences.flush();
+            soundToggleButton.setSoundOn(false);
         } else {
             music.play();
+            preferences.putInteger("soundOn", 1);
+            preferences.flush();
+            soundToggleButton.setSoundOn(true);
         }
     }
 

@@ -21,15 +21,6 @@ public class SoundToggleButton extends Actor {
         preferences = Gdx.app.getPreferences(TetrisGame.PREFERENCES);
 
         soundOn = preferences.getInteger("soundOn") == 1;
-
-        addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                preferences.putInteger("soundOn", soundOn ? 0 : 1);
-                preferences.flush();
-                soundOn = !soundOn;
-            }
-        });
     }
 
     @Override
@@ -41,5 +32,13 @@ public class SoundToggleButton extends Actor {
         }
 
         setBounds(getX(), getY(), 10, 10);
+    }
+
+    public boolean isSoundOn() {
+        return soundOn;
+    }
+
+    public void setSoundOn(boolean soundOn) {
+        this.soundOn = soundOn;
     }
 }
