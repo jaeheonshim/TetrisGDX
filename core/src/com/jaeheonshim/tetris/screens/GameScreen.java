@@ -1,5 +1,6 @@
 package com.jaeheonshim.tetris.screens;
 
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
@@ -7,15 +8,27 @@ import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.Window;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.jaeheonshim.tetris.TetrisGame;
 import com.jaeheonshim.tetris.util.DelayedIntervalKeypressListener;
 import com.jaeheonshim.tetris.util.Util;
 import com.jaeheonshim.tetris.game.BlockType;
 import com.jaeheonshim.tetris.game.GameState;
+import com.jaeheonshim.tetris.widgets.GameOverWidget;
 
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -23,6 +36,11 @@ import java.util.Queue;
 import java.util.Random;
 
 public class GameScreen implements Screen {
+    private final TetrisGame tetrisGame;
+
+    private Stage stage;
+    private Table table;
+
     private Viewport viewport;
     private Viewport backgroundViewport;
     private GameScene gameScene;
@@ -52,7 +70,11 @@ public class GameScreen implements Screen {
     private Integer[] konami = {Input.Keys.UP, Input.Keys.UP, Input.Keys.DOWN, Input.Keys.DOWN, Input.Keys.LEFT, Input.Keys.RIGHT, Input.Keys.LEFT, Input.Keys.RIGHT, Input.Keys.B, Input.Keys.A};
     private boolean konamiActivated = false;
 
-    public GameScreen() {
+    private boolean gameOver = false;
+
+    public GameScreen(TetrisGame game) {
+        this.tetrisGame = game;
+
         viewport = new FitViewport(900, 900);
         backgroundViewport = new ExtendViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
@@ -68,6 +90,15 @@ public class GameScreen implements Screen {
 
         music.setVolume(0.6f);
         music.setLooping(true);
+
+        stage = new Stage(new ExtendViewport(100, 100));
+        Gdx.input.setInputProcessor(stage);
+
+        table = new Table();
+        table.setFillParent(true);
+        //table.add(new GameOverWidget(99, 99, 99)).width(100);
+
+        stage.addActor(table);
     }
 
     @Override
@@ -83,23 +114,39 @@ public class GameScreen implements Screen {
 
         blockUpdateTimer -= delta;
 
-        nextDropPanel.setBlockType(gameScene.getGameState().getNextDrop());
+        GameState gameState = gameScene.getGameState();
+        nextDropPanel.setBlockType(gameState.getNextDrop());
 
-        gameScene.getGameState().doGameTick(delta, downListener.isPressed());
-        gameDetailPanel.setScore(gameScene.getGameState().getScore().get());
-        linesClearedPanel.setLinesCleared(gameScene.getGameState().getLinesCleared().get());
-        levelPanel.setLevel(gameScene.getGameState().getLevel().get());
+        gameState.doGameTick(delta, downListener.isPressed());
+        gameDetailPanel.setScore(gameState.getScore().get());
+        linesClearedPanel.setLinesCleared(gameState.getLinesCleared().get());
+        levelPanel.setLevel(gameState.getLevel().get());
+
+        if(gameState.isGameOver() && !gameOver) {
+            GameOverWidget gameOverWidget = new GameOverWidget(gameState.getLevel().get(), gameState.getScore().get(), gameState.getLinesCleared().get());
+            gameOverWidget.getNewGameButton().addListener(new ClickListener() {
+                @Override
+                public void clicked(InputEvent event, float x, float y) {
+                    dispose();
+                    tetrisGame.setScreen(new GameScreen(tetrisGame));
+                }
+            });
+
+            table.add(gameOverWidget).width(100);
+
+            gameOver = true;
+        }
 
         if (upListener.isPressed()) {
-            gameScene.getGameState().rotateMoving();
+            gameState.rotateMoving();
         }
 
         if (leftListener.isPressed()) {
-            gameScene.getGameState().translateMoving(-1);
+            gameState.translateMoving(-1);
         }
 
         if (rightListener.isPressed()) {
-            gameScene.getGameState().translateMoving(1);
+            gameState.translateMoving(1);
         }
 
         for(int key : konami) {
@@ -143,6 +190,10 @@ public class GameScreen implements Screen {
         linesClearedPanel.draw(gameCenterCoordinateX, gameCenterCoordinateY + gameScene.getInnerGameHeightDimension() + 10, spriteBatch);
         nextDropPanel.draw(gameCenterCoordinateX + gameScene.getInnerGameWidthDimension() + 20, gameCenterCoordinateY + gameScene.getInnerGameHeightDimension() - gameDetailPanel.getHeight() - nextDropPanel.getHeight() - 60, spriteBatch);
         levelPanel.draw(gameCenterCoordinateX + gameScene.getInnerGameWidthDimension() + 20, gameCenterCoordinateY + gameScene.getInnerGameHeightDimension() - gameDetailPanel.getHeight() - nextDropPanel.getHeight() - levelPanel.getHeight() - 70, spriteBatch);
+
+        stage.getViewport().apply();
+        stage.act(delta);
+        stage.draw();
     }
 
     private void renderBackgroundTiles(SpriteBatch spriteBatch) {
@@ -194,6 +245,7 @@ public class GameScreen implements Screen {
     public void resize(int width, int height) {
         backgroundViewport.update(width, height, true);
         viewport.update(width, height, true);
+        stage.getViewport().update(width, height, true);
     }
 
     @Override
@@ -203,7 +255,7 @@ public class GameScreen implements Screen {
 
     @Override
     public void resume() {
-
+A
     }
 
     @Override
@@ -216,5 +268,7 @@ public class GameScreen implements Screen {
         spriteBatch.dispose();
         shapeRenderer.dispose();
         backgroundTexture.dispose();
+        stage.dispose();
+        music.dispose();
     }
 }

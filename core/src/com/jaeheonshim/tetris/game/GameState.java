@@ -378,6 +378,16 @@ public class GameState {
         }
     }
 
+    public boolean isGameOver() {
+        for(int i = (width / 2) - 2; i < (width / 2) + 2; i++) {
+            if(blockStates[0][i] != null && blockStates[0][i].isFixed()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public ObfuscatedMemoryInteger getLevel() {
         return level;
     }
