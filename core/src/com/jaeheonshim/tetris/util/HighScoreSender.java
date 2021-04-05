@@ -18,10 +18,11 @@ import java.util.function.Supplier;
 public class HighScoreSender {
     private static final String secret = "3QG2Y1p2vz719nF0GiLxMgTz0Kg7V9UO";
     private static Random random = new Random();
+    private static String endpoint = "https://tetris.jaeheonshim.dev/highscore";
 
     public static void getScores(final Consumer<HighScoreEntry[]> consumer) {
         HttpRequestBuilder requestBuilder = new HttpRequestBuilder();
-        Net.HttpRequest httpRequest = requestBuilder.newRequest().method(Net.HttpMethods.GET).url("http://localhost:8080/highscore").timeout(2000).build();
+        Net.HttpRequest httpRequest = requestBuilder.newRequest().method(Net.HttpMethods.GET).url(endpoint).timeout(2000).build();
 
         Gdx.net.sendHttpRequest(httpRequest, new Net.HttpResponseListener() {
             @Override
@@ -53,11 +54,11 @@ public class HighScoreSender {
     }
 
     public static void sendVerifiedScore(String name, int score) {
-        String payload = name + ":" + score + ":" + System.currentTimeMillis() + ":" + UUID.randomUUID().toString();
+        String payload = name + ":" + score + ":" + System.currentTimeMillis() + ":" + randomString(16);
         payload += ("=" + generateHash(payload));
 
         HttpRequestBuilder requestBuilder = new HttpRequestBuilder();
-        Net.HttpRequest httpRequest = requestBuilder.newRequest().method(Net.HttpMethods.POST).url("http://localhost:8080/highscore").content(payload).build();
+        Net.HttpRequest httpRequest = requestBuilder.newRequest().method(Net.HttpMethods.POST).url(endpoint).content(payload).build();
         Gdx.net.sendHttpRequest(httpRequest, null);
     }
 
@@ -85,5 +86,14 @@ public class HighScoreSender {
             hexString.append(hex);
         }
         return hexString.toString();
+    }
+
+    public static String randomString(int length) {
+        String s = "";
+        for(int i = 0; i < length; i++) {
+            s += (char) (random.nextInt('Z' - 'A') + 'A');
+        }
+
+        return s;
     }
 }
