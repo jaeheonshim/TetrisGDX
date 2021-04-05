@@ -134,6 +134,12 @@ public class GameState {
         dropTimer.setValue(Util.getLevelSpeed(level.get()));
     }
 
+    public void hardDrop() {
+        while(!newBlockReady()) {
+            tickBlocks();
+        }
+    }
+
     public boolean tickBlocks() {
         boolean blocksMoved = false;
         BlockState[][] updated = new BlockState[height][width];

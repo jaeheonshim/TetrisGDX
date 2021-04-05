@@ -21,6 +21,7 @@ import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.jaeheonshim.tetris.TetrisGame;
+import com.jaeheonshim.tetris.game.BlockState;
 import com.jaeheonshim.tetris.util.DelayedIntervalKeypressListener;
 import com.jaeheonshim.tetris.util.HighScoreEntry;
 import com.jaeheonshim.tetris.util.HighScoreSender;
@@ -29,6 +30,7 @@ import com.jaeheonshim.tetris.game.GameState;
 import com.jaeheonshim.tetris.widgets.GameOverWidget;
 import com.jaeheonshim.tetris.widgets.SoundToggleButton;
 import com.jaeheonshim.tetris.widgets.SubmitHighScoreWidget;
+import sun.jvm.hotspot.opto.Block;
 
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -187,7 +189,7 @@ public class GameScreen implements Screen {
             HighScoreSender.getScores(new Consumer<HighScoreEntry[]>() {
                 @Override
                 public void accept(HighScoreEntry[] scoreEntries) {
-                    if(scoreEntries.length == 0) {
+                    if(scoreEntries.length < 10) {
                         gameOverWidget.buildButtons(true);
                     } else {
                         int lowestScore = scoreEntries[scoreEntries.length - 1].getScore();
@@ -219,6 +221,16 @@ public class GameScreen implements Screen {
 
         if (rightListener.isPressed()) {
             gameState.translateMoving(1);
+        }
+
+        if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
+            gameState.hardDrop();
+        }
+
+        if(Gdx.input.isKeyJustPressed(Input.Keys.END)) {
+            if(Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT)) {
+                gameState.getBlockStates()[0][5] = new BlockState(Color.RED).setFixed(true);
+            }
         }
 
         for(int key : konami) {

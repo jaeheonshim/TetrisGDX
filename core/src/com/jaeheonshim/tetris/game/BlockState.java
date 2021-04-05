@@ -23,8 +23,9 @@ public class BlockState {
         this.blockColor = blockColor;
     }
 
-    public void setFixed(boolean fixed) {
+    public BlockState setFixed(boolean fixed) {
         this.fixed = fixed;
+        return this;
     }
 
     public boolean isPivot() {
