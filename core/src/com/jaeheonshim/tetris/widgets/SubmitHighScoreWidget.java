@@ -70,8 +70,12 @@ public class SubmitHighScoreWidget extends Table {
                     return;
                 }
 
-                HighScoreSender.sendVerifiedScore(nameField.getText().trim(), highScore);
-                setVisible(false);
+                HighScoreSender.sendVerifiedScore(nameField.getText().trim(), highScore, new Runnable() {
+                    @Override
+                    public void run() {
+                        setVisible(false);
+                    }
+                });
             }
         });
     }

@@ -53,13 +53,30 @@ public class HighScoreSender {
         });
     }
 
-    public static void sendVerifiedScore(String name, int score) {
+    public static void sendVerifiedScore(String name, int score, final Runnable onSuccess) {
         String payload = name + ":" + score + ":" + System.currentTimeMillis() + ":" + randomString(16);
         payload += ("=" + generateHash(payload));
 
         HttpRequestBuilder requestBuilder = new HttpRequestBuilder();
         Net.HttpRequest httpRequest = requestBuilder.newRequest().method(Net.HttpMethods.POST).url(endpoint).content(payload).build();
-        Gdx.net.sendHttpRequest(httpRequest, null);
+        Gdx.net.sendHttpRequest(httpRequest, new Net.HttpResponseListener() {
+            @Override
+            public void handleHttpResponse(Net.HttpResponse httpResponse) {
+                if(httpResponse.getStatus().getStatusCode() == HttpStatus.SC_OK) {
+                    onSuccess.run();
+                }
+            }
+
+            @Override
+            public void failed(Throwable t) {
+
+            }
+
+            @Override
+            public void cancelled() {
+
+            }
+        });
     }
 
     private static String generateHash(String payload) {

@@ -2,6 +2,7 @@ package com.jaeheonshim.tetris.game;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
+import com.jaeheonshim.tetris.util.Bag;
 import com.jaeheonshim.tetris.util.ObfuscatedMemoryInteger;
 import com.jaeheonshim.tetris.util.Timer;
 import com.jaeheonshim.tetris.util.Util;
@@ -23,6 +24,8 @@ public class GameState {
     private BlockState[][] blockStates;
     private BlockType currentDrop;
     private Timer dropTimer = new Timer(Util.getLevelSpeed(level.get()));
+
+    private Bag<BlockType> blockTypeBag = new Bag<>();
 
     private BlockType nextDrop = randomBlockType();
 
@@ -407,7 +410,15 @@ public class GameState {
     }
 
     public BlockType randomBlockType() {
-        return BlockType.values()[random.nextInt(BlockType.values().length)];
+        if(blockTypeBag.isEmpty()) {
+            for(BlockType t : BlockType.values()) {
+                blockTypeBag.add(t);
+            }
+
+            blockTypeBag.shuffle();
+        }
+
+        return blockTypeBag.get();
     }
 
     public static Color randomColor() {
