@@ -1,14 +1,15 @@
-package com.jaeheonshim.tetris.screens;
+package com.jaeheonshim.tetris.screens.game;
 
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.utils.Disposable;
 import com.jaeheonshim.tetris.game.BlockState;
 import com.jaeheonshim.tetris.game.GameState;
 
-public class GameScene {
+public class GameScene implements Disposable {
     private Texture blockTexture = new Texture("Block.png");
     private int innerGameWidth = 10;
     private int innerGameHeight = 20;
@@ -89,5 +90,10 @@ public class GameScene {
 
     public GameState getGameState() {
         return gameState;
+    }
+
+    @Override
+    public void dispose() {
+        blockTexture.dispose();
     }
 }

@@ -1,4 +1,4 @@
-package com.jaeheonshim.tetris.screens;
+package com.jaeheonshim.tetris.screens.game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -7,8 +7,9 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.utils.Disposable;
 
-public class GameDetailPanel {
+public class GameDetailPanel implements Disposable {
     private NinePatch boxFrame;
     private BitmapFont font;
     private GlyphLayout glyphLayout = new GlyphLayout();
@@ -74,5 +75,10 @@ public class GameDetailPanel {
 
     public void setRecord(int record) {
         this.record = record;
+    }
+
+    @Override
+    public void dispose() {
+        font.dispose();
     }
 }

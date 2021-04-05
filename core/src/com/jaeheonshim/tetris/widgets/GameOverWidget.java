@@ -6,18 +6,10 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
-import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
-import com.jaeheonshim.tetris.TetrisGame;
-import com.jaeheonshim.tetris.screens.GameScreen;
 
 public class GameOverWidget extends Table {
     private BitmapFont headingFont;
@@ -34,6 +26,9 @@ public class GameOverWidget extends Table {
     private Texture newGameTexture = new Texture("ui/new_game_button.png");
     private final TextButton newGameButton;
     private final TextButton exitButton;
+    private Label scoreValue;
+    private Label rowsValue;
+    private Label levelValue;
 
     public GameOverWidget(int level, int score, int lines) {
         background = new NinePatch(new Texture("ui/Panel.png"), 1, 1, 1, 1);
@@ -77,13 +72,13 @@ public class GameOverWidget extends Table {
     private Table getStatsTable() {
         Label.LabelStyle style = new Label.LabelStyle(detailFont, Color.WHITE);
         Label scoreLabel = new Label("SCORE: ", style);
-        Label scoreValue = new Label(String.format("%06d", score), style);
+        scoreValue = new Label(String.format("%06d", score), style);
 
         Label rowsLabel = new Label("LINES CLEARED: ", style);
-        Label rowsValue = new Label(Integer.toString(lines), style);
+        rowsValue = new Label(Integer.toString(lines), style);
 
         Label levelLabel = new Label("LEVEL REACHED: ", style);
-        Label levelValue = new Label(Integer.toString(level), style);
+        levelValue = new Label(Integer.toString(level), style);
 
 
         Table statsTable = new Table();
@@ -115,6 +110,7 @@ public class GameOverWidget extends Table {
 
     public void setLevel(int level) {
         this.level = level;
+
     }
 
     public int getScore() {
@@ -123,6 +119,7 @@ public class GameOverWidget extends Table {
 
     public void setScore(int score) {
         this.score = score;
+        scoreValue.setText(String.format("%06d", score));
     }
 
     public int getLines() {
@@ -131,5 +128,6 @@ public class GameOverWidget extends Table {
 
     public void setLines(int lines) {
         this.lines = lines;
+        levelValue.setText(Integer.toString(level));
     }
 }

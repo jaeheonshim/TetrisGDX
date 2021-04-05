@@ -1,34 +1,30 @@
-package com.jaeheonshim.tetris.screens;
+package com.jaeheonshim.tetris.screens.game;
 
-import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.jaeheonshim.tetris.TetrisGame;
 import com.jaeheonshim.tetris.util.DelayedIntervalKeypressListener;
 import com.jaeheonshim.tetris.util.Util;
-import com.jaeheonshim.tetris.game.BlockType;
 import com.jaeheonshim.tetris.game.GameState;
 import com.jaeheonshim.tetris.widgets.GameOverWidget;
+import com.jaeheonshim.tetris.widgets.SoundToggleButton;
 
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -57,6 +53,7 @@ public class GameScreen implements Screen {
     private float blockUpdateTimer = 1;
 
     private Texture backgroundTexture = new Texture("backgroundtile.png");
+
     private float backgroundScaling = 0.1f;
 
     private DelayedIntervalKeypressListener leftListener = new DelayedIntervalKeypressListener(Input.Keys.LEFT, 0.1f);
@@ -72,8 +69,14 @@ public class GameScreen implements Screen {
 
     private boolean gameOver = false;
 
+    private Preferences preferences;
+    private SoundToggleButton soundToggleButton;
+    private final GameOverWidget gameOverWidget;
+
     public GameScreen(TetrisGame game) {
         this.tetrisGame = game;
+
+        preferences = Gdx.app.getPreferences(TetrisGame.PREFERENCES);
 
         viewport = new FitViewport(900, 900);
         backgroundViewport = new ExtendViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -92,18 +95,45 @@ public class GameScreen implements Screen {
         music.setLooping(true);
 
         stage = new Stage(new ExtendViewport(100, 100));
-        Gdx.input.setInputProcessor(stage);
 
         table = new Table();
         table.setFillParent(true);
+        table.center();
         //table.add(new GameOverWidget(99, 99, 99)).width(100);
+
+        gameOverWidget = new GameOverWidget(0, 0, 0);
+        gameOverWidget.getNewGameButton().addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                dispose();
+                tetrisGame.setScreen(new GameScreen(tetrisGame));
+            }
+        });
+
+        gameOverWidget.setVisible(false);
+        table.add(gameOverWidget).width(100).expand();
+
+        soundToggleButton = new SoundToggleButton();
+        soundToggleButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                toggleMusic();
+            }
+        });
+
+        table.row().left().bottom();
+        table.add(soundToggleButton);
 
         stage.addActor(table);
     }
 
     @Override
     public void show() {
-        music.play();
+        Gdx.input.setInputProcessor(stage);
+
+        if(preferences.getInteger("soundOn") == 1) {
+            music.play();
+        }
     }
 
     public void update(float delta) {
@@ -123,16 +153,7 @@ public class GameScreen implements Screen {
         levelPanel.setLevel(gameState.getLevel().get());
 
         if(gameState.isGameOver() && !gameOver) {
-            GameOverWidget gameOverWidget = new GameOverWidget(gameState.getLevel().get(), gameState.getScore().get(), gameState.getLinesCleared().get());
-            gameOverWidget.getNewGameButton().addListener(new ClickListener() {
-                @Override
-                public void clicked(InputEvent event, float x, float y) {
-                    dispose();
-                    tetrisGame.setScreen(new GameScreen(tetrisGame));
-                }
-            });
-
-            table.add(gameOverWidget).width(100);
+            gameOverWidget.setVisible(true);
 
             gameOver = true;
         }
@@ -235,10 +256,20 @@ public class GameScreen implements Screen {
         music = Gdx.audio.newMusic(Gdx.files.internal("audio/cooltheme.mp3"));
         music.setVolume(0.6f);
         music.setLooping(true);
-        music.play();
+        if(preferences.getInteger("soundOn") == 1) {
+            music.play();
+        }
         konamiActivated = true;
 
         backgroundTexture = new Texture("coolbackgroundtile.png");
+    }
+
+    private void toggleMusic() {
+        if(music.isPlaying()) {
+            music.stop();
+        } else {
+            music.play();
+        }
     }
 
     @Override
@@ -255,7 +286,7 @@ public class GameScreen implements Screen {
 
     @Override
     public void resume() {
-A
+
     }
 
     @Override
