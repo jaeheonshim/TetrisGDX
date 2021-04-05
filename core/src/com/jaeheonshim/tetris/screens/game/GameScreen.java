@@ -13,6 +13,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
+import com.badlogic.gdx.scenes.scene2d.ui.Stack;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
@@ -21,16 +22,19 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.jaeheonshim.tetris.TetrisGame;
 import com.jaeheonshim.tetris.util.DelayedIntervalKeypressListener;
+import com.jaeheonshim.tetris.util.HighScoreEntry;
 import com.jaeheonshim.tetris.util.HighScoreSender;
 import com.jaeheonshim.tetris.util.Util;
 import com.jaeheonshim.tetris.game.GameState;
 import com.jaeheonshim.tetris.widgets.GameOverWidget;
 import com.jaeheonshim.tetris.widgets.SoundToggleButton;
+import com.jaeheonshim.tetris.widgets.SubmitHighScoreWidget;
 
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Random;
+import java.util.function.Consumer;
 
 public class GameScreen implements Screen {
     private final TetrisGame tetrisGame;
@@ -73,6 +77,7 @@ public class GameScreen implements Screen {
     private Preferences preferences;
     private SoundToggleButton soundToggleButton;
     private final GameOverWidget gameOverWidget;
+    private SubmitHighScoreWidget submitHighScoreWidget;
 
     public GameScreen(TetrisGame game) {
         this.tetrisGame = game;
@@ -96,11 +101,16 @@ public class GameScreen implements Screen {
         music.setLooping(true);
 
         stage = new Stage(new ExtendViewport(100, 100));
+        Stack stack = new Stack();
+        stack.setFillParent(true);
 
         table = new Table();
         table.setFillParent(true);
         table.center();
         //table.add(new GameOverWidget(99, 99, 99)).width(100);
+
+        submitHighScoreWidget = new SubmitHighScoreWidget();
+        submitHighScoreWidget.setVisible(false);
 
         gameOverWidget = new GameOverWidget(0, 0, 0);
         gameOverWidget.getNewGameButton().addListener(new ClickListener() {
@@ -119,6 +129,14 @@ public class GameScreen implements Screen {
             }
         });
 
+        gameOverWidget.getSubmitHighScoreButton().addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                submitHighScoreWidget.setVisible(true);
+                gameOverWidget.getSubmitHighScoreButton().setVisible(false);
+            }
+        });
+
         gameOverWidget.setVisible(false);
         table.add(gameOverWidget).width(100).expand();
 
@@ -132,8 +150,10 @@ public class GameScreen implements Screen {
 
         table.row().left().bottom();
         table.add(soundToggleButton);
+        stack.add(table);
+        stack.add(submitHighScoreWidget);
 
-        stage.addActor(table);
+        stage.addActor(stack);
     }
 
     @Override
@@ -153,7 +173,7 @@ public class GameScreen implements Screen {
 
         blockUpdateTimer -= delta;
 
-        GameState gameState = gameScene.getGameState();
+        final GameState gameState = gameScene.getGameState();
         nextDropPanel.setBlockType(gameState.getNextDrop());
 
         if(!gameOver) {
@@ -164,13 +184,27 @@ public class GameScreen implements Screen {
         levelPanel.setLevel(gameState.getLevel().get());
 
         if(gameState.isGameOver() && !gameOver) {
-            gameOverWidget.setVisible(true);
+            HighScoreSender.getScores(new Consumer<HighScoreEntry[]>() {
+                @Override
+                public void accept(HighScoreEntry[] scoreEntries) {
+                    if(scoreEntries.length == 0) {
+                        gameOverWidget.buildButtons(true);
+                    } else {
+                        int lowestScore = scoreEntries[scoreEntries.length - 1].getScore();
+                        gameOverWidget.buildButtons(gameState.getScore().get() >= lowestScore);
+                    }
 
-            gameOverWidget.setScore(gameState.getScore().get());
-            gameOverWidget.setLevel(gameState.getLevel().get());
-            gameOverWidget.setLines(gameState.getLinesCleared().get());
+                    gameOverWidget.setVisible(true);
 
-            HighScoreSender.sendVerifiedScore("Jaeheon", gameState.getScore().get());
+                    gameOverWidget.setScore(gameState.getScore().get());
+                    gameOverWidget.setLevel(gameState.getLevel().get());
+                    gameOverWidget.setLines(gameState.getLinesCleared().get());
+
+                    submitHighScoreWidget.setHighScore(gameState.getScore().get());
+                }
+            });
+
+//            HighScoreSender.sendVerifiedScore("Jaeheon", gameState.getScore().get());
 
             gameOver = true;
         }

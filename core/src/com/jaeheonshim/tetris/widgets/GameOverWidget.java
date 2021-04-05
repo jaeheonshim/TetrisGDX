@@ -27,6 +27,7 @@ public class GameOverWidget extends Table {
     private Texture newGameTexture = new Texture("ui/new_game_button.png");
     private final TextButton newGameButton;
     private final TextButton exitButton;
+    private final TextButton submitHighScoreButton;
     private Label scoreValue;
     private Label rowsValue;
     private Label levelValue;
@@ -48,6 +49,7 @@ public class GameOverWidget extends Table {
         Label heading = new Label("GAME OVER!", new Label.LabelStyle(headingFont, Color.WHITE));
         newGameButton = new TextButton("NEW GAME", buttonStyle);
         exitButton = new TextButton("EXIT", buttonStyle);
+        submitHighScoreButton = new TextButton("SUBMIT HIGH SCORE", buttonStyle);
 
         this.level = level;
         this.lines = lines;
@@ -62,6 +64,13 @@ public class GameOverWidget extends Table {
 
         row();
         add(getStatsTable()).colspan(3).fillX();
+    }
+
+    public void buildButtons(boolean highScore) {
+        if(highScore) {
+            row();
+            add(submitHighScoreButton).expandX().padTop(2).height(10).colspan(2);
+        }
 
         row();
         add(newGameButton).expandX().padTop(2).height(10);
@@ -130,5 +139,9 @@ public class GameOverWidget extends Table {
     public void setLines(int lines) {
         this.lines = lines;
         levelValue.setText(Integer.toString(level));
+    }
+
+    public TextButton getSubmitHighScoreButton() {
+        return submitHighScoreButton;
     }
 }

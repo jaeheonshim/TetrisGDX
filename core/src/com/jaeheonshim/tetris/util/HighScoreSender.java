@@ -21,7 +21,7 @@ public class HighScoreSender {
 
     public static void getScores(final Consumer<HighScoreEntry[]> consumer) {
         HttpRequestBuilder requestBuilder = new HttpRequestBuilder();
-        Net.HttpRequest httpRequest = requestBuilder.newRequest().method(Net.HttpMethods.GET).url("http://localhost:8080/highscore").build();
+        Net.HttpRequest httpRequest = requestBuilder.newRequest().method(Net.HttpMethods.GET).url("http://localhost:8080/highscore").timeout(2000).build();
 
         Gdx.net.sendHttpRequest(httpRequest, new Net.HttpResponseListener() {
             @Override
@@ -42,7 +42,7 @@ public class HighScoreSender {
 
             @Override
             public void failed(Throwable t) {
-
+                consumer.accept(new HighScoreEntry[0]);
             }
 
             @Override
