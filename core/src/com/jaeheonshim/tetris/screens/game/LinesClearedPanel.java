@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.jaeheonshim.tetris.util.Util;
 
 public class LinesClearedPanel {
     private NinePatch boxFrame;
@@ -29,10 +30,10 @@ public class LinesClearedPanel {
         spriteBatch.begin();
         spriteBatch.setColor(Color.WHITE);
 
-        String text = String.format("LINES: %03d", linesCleared);
+        String text = "LINES: " + Util.padZeros(linesCleared, 3);
         glyphLayout.setText(font, text);
         boxFrame.draw(spriteBatch, x, y, width, height);
-        font.draw(spriteBatch, String.format(text, 12), x + (width / 2) - glyphLayout.width / 2, y + glyphLayout.height / 2 + height / 2);
+        font.draw(spriteBatch, text, x + (width / 2) - glyphLayout.width / 2, y + glyphLayout.height / 2 + height / 2);
 
         spriteBatch.end();
     }

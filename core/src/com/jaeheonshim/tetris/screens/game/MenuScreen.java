@@ -9,18 +9,21 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.jaeheonshim.tetris.TetrisGame;
+import com.jaeheonshim.tetris.util.HighScoreEntry;
+import com.jaeheonshim.tetris.util.HighScoreSender;
+import com.jaeheonshim.tetris.widgets.HighScoresWidget;
+
+import java.util.function.Consumer;
 
 public class MenuScreen implements Screen {
+    private final HighScoresWidget highScoresWidget;
     private TetrisGame tetrisGame;
 
     private Viewport viewport;
@@ -37,6 +40,8 @@ public class MenuScreen implements Screen {
 
     private SpriteBatch spriteBatch;
     private Stage stage;
+
+    private final Stack stack;
 
     public MenuScreen(final TetrisGame tetrisGame) {
         this.tetrisGame = tetrisGame;
@@ -57,6 +62,9 @@ public class MenuScreen implements Screen {
         Image logo = new Image(tetris);
         logo.setScaling(Scaling.fit);
 
+        stack = new Stack();
+        stack.setFillParent(true);
+
         Table table = new Table();
         table.setFillParent(true);
         table.padTop(10);
@@ -75,10 +83,30 @@ public class MenuScreen implements Screen {
             }
         });
 
-        table.row();
-        table.add(playButton).padTop(10);
+        TextButton highScores = new TextButton("HIGH SCORES", buttonStyle);
+        highScores.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                displayHighScores();
+            }
+        });
 
-        stage.addActor(table);
+        table.row();
+        table.add(playButton).padTop(10).width(60);
+        table.row();
+        table.add(highScores).padTop(2).width(60);
+
+        stack.addActor(table);
+
+        highScoresWidget = new HighScoresWidget();
+        highScoresWidget.setVisible(false);
+        Container highScoresContainer = new Container(highScoresWidget);
+        highScoresContainer.width(100);
+        highScoresContainer.height(80);
+
+        stack.add(highScoresContainer);
+
+        stage.addActor(stack);
     }
 
     @Override
@@ -122,6 +150,16 @@ public class MenuScreen implements Screen {
                 );
             }
         }
+    }
+
+    private void displayHighScores() {
+        HighScoreSender.getScores(new Consumer<HighScoreEntry[]>() {
+            @Override
+            public void accept(HighScoreEntry[] scoreEntries) {
+                highScoresWidget.setHighScores(scoreEntries);
+                highScoresWidget.setVisible(true);
+            }
+        });
     }
 
     @Override

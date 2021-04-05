@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.Disposable;
+import com.jaeheonshim.tetris.util.Util;
 
 public class GameDetailPanel implements Disposable {
     private NinePatch boxFrame;
@@ -39,7 +40,7 @@ public class GameDetailPanel implements Disposable {
         boxFrame.draw(spriteBatch, x, y, width, height);
 
         glyphLayout.setText(font, "SCORE");
-        font.draw(spriteBatch, String.format("SCORE\n%06d\n\nBEST\n%06d\n\nRECORD\n%06d", score, best, record), x + paddingX, y + height - paddingY);
+        font.draw(spriteBatch, "SCORE\n" + Util.padZeros(score) + "\n\nBEST\n" + Util.padZeros(best) + "\n\nRECORD\n" + Util.padZeros(record), x + paddingX, y + height - paddingY);
 
 
         spriteBatch.end();

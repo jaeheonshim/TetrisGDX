@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.jaeheonshim.tetris.util.Util;
 
 public class LevelPanel {
     private NinePatch boxFrame;
@@ -32,7 +33,7 @@ public class LevelPanel {
 
         boxFrame.draw(spriteBatch, x, y, width, height);
 
-        String text = String.format("LEVEL\n%d", level);
+        String text = "LEVEL\n" + Util.padZeros(level);
         glyphLayout.setText(font, text);
 
         font.draw(spriteBatch, text, x + (width / 2) - (glyphLayout.width / 2), y + (height / 2) + (glyphLayout.height / 2));

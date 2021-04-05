@@ -61,4 +61,20 @@ public class Util {
             return 1 / 60f;
         }
     }
+
+    public static String padZeros(int n, int c) {
+        int len = Integer.toString(n).length();
+        String res = "";
+        for(int i = 0; i < c - len; i++) {
+            res += "0";
+        }
+
+        res += n;
+
+        return res;
+    }
+
+    public static String padZeros(int n) {
+        return padZeros(n, 6);
+    }
 }

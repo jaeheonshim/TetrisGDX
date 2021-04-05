@@ -10,6 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
+import com.jaeheonshim.tetris.util.Util;
 
 public class GameOverWidget extends Table {
     private BitmapFont headingFont;
@@ -72,7 +73,7 @@ public class GameOverWidget extends Table {
     private Table getStatsTable() {
         Label.LabelStyle style = new Label.LabelStyle(detailFont, Color.WHITE);
         Label scoreLabel = new Label("SCORE: ", style);
-        scoreValue = new Label(String.format("%06d", score), style);
+        scoreValue = new Label(Integer.toString(score), style);
 
         Label rowsLabel = new Label("LINES CLEARED: ", style);
         rowsValue = new Label(Integer.toString(lines), style);
@@ -119,7 +120,7 @@ public class GameOverWidget extends Table {
 
     public void setScore(int score) {
         this.score = score;
-        scoreValue.setText(String.format("%06d", score));
+        scoreValue.setText(Util.padZeros(score));
     }
 
     public int getLines() {

@@ -21,6 +21,7 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.jaeheonshim.tetris.TetrisGame;
 import com.jaeheonshim.tetris.util.DelayedIntervalKeypressListener;
+import com.jaeheonshim.tetris.util.HighScoreSender;
 import com.jaeheonshim.tetris.util.Util;
 import com.jaeheonshim.tetris.game.GameState;
 import com.jaeheonshim.tetris.widgets.GameOverWidget;
@@ -110,6 +111,14 @@ public class GameScreen implements Screen {
             }
         });
 
+        gameOverWidget.getExitButton().addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                dispose();
+                tetrisGame.setScreen(new MenuScreen(tetrisGame));
+            }
+        });
+
         gameOverWidget.setVisible(false);
         table.add(gameOverWidget).width(100).expand();
 
@@ -147,13 +156,21 @@ public class GameScreen implements Screen {
         GameState gameState = gameScene.getGameState();
         nextDropPanel.setBlockType(gameState.getNextDrop());
 
-        gameState.doGameTick(delta, downListener.isPressed());
+        if(!gameOver) {
+            gameState.doGameTick(delta, downListener.isPressed());
+        }
         gameDetailPanel.setScore(gameState.getScore().get());
         linesClearedPanel.setLinesCleared(gameState.getLinesCleared().get());
         levelPanel.setLevel(gameState.getLevel().get());
 
         if(gameState.isGameOver() && !gameOver) {
             gameOverWidget.setVisible(true);
+
+            gameOverWidget.setScore(gameState.getScore().get());
+            gameOverWidget.setLevel(gameState.getLevel().get());
+            gameOverWidget.setLines(gameState.getLinesCleared().get());
+
+            HighScoreSender.sendVerifiedScore("Jaeheon", gameState.getScore().get());
 
             gameOver = true;
         }
